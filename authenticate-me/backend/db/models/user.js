@@ -4,31 +4,31 @@ const bcrypt = require("bcryptjs");
 
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
-    toSafeObject(){
+    toSafeObject() {
       const { id, username, email } = this;
-      return {id, username, email};
+      return { id, username, email };
     }
     validatePassword(password) {
-     return bcrypt.compareSync(password, this.hashedPassword.toString());
+      return bcrypt.compareSync(password, this.hashedPassword.toString());
     }
-    static getCurrentUserById(id){
+    static getCurrentUserById(id) {
       return User.scope("currentUser").findByPk(id)
     }
-    static async login({credential, password}) {
-      const {Op} = require('sequelize');
+    static async login({ credential, password }) {
+      const { Op } = require('sequelize');
       const user = await User.scope('loginUser').findOne({
         where: {
           [Op.or]: {
             email: credential,
-            password:credential
+            password: credential
           }
         }
       })
-      if (user && user.validatePassword(password)){
+      if (user && user.validatePassword(password)) {
         return await User.scope('currentUser').findByPk(user.id)
       }
     }
-    static async signup({firstName, lastName, username, email, password}) {
+    static async signup({ firstName, lastName, username, email, password }) {
       const hashedPassword = bcrypt.hashSync(password);
       const user = await User.create({
         firstName,
